@@ -5,17 +5,13 @@ import static android.content.Context.LAYOUT_INFLATER_SERVICE;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
-import android.view.ContextMenu;
 import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.PopupWindow;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -23,6 +19,7 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.grocerylistkts.DatabaseHelper;
 import com.example.grocerylistkts.GroceryItem;
 import com.example.grocerylistkts.GroceryItemRVAdapter;
 import com.example.grocerylistkts.GroceryItemRVInterface;
@@ -74,10 +71,16 @@ public class HomeFragment extends Fragment implements GroceryItemRVInterface {
             popupWindow.showAtLocation(binding.getRoot().getRootView().findViewById(R.id.navigation_home), Gravity.CENTER, 0, 0);
 
             createNewItemButton.setOnClickListener(view -> {
-                groceryItemArrayList.add(new GroceryItem((Integer.parseInt(countEditText.getText().toString())),
-                        (nameEditText.getText().toString()),
-                        (idEditText.getText().toString())));
+                GroceryItem newGroceryItem = new GroceryItem(
+                        Integer.parseInt(countEditText.getText().toString()),
+                        nameEditText.getText().toString(),
+                        idEditText.getText().toString());
+                DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
+                boolean success = dbHelper.addOne(newGroceryItem);
+                if(success)
+                    groceryItemArrayList.add(newGroceryItem);
                 rvAdapter.notifyItemInserted(groceryItemArrayList.size());
+
                 popupWindow.dismiss();
             });
         });
@@ -86,13 +89,8 @@ public class HomeFragment extends Fragment implements GroceryItemRVInterface {
 
 
     private void setUpGroceryItemArrayList() {
-        String[] groceryItemIDList = new String[]{"first", "second", "third"};
-        String[] groceryItemCountList = new String[]{"1", "2", "3"};
-        String[] groceryItemNameList = new String[]{"firstName", "secondName", "thirdName"};
-
-        for(int i = 0 ; i < groceryItemIDList.length; i++) {
-            groceryItemArrayList.add(new GroceryItem(Integer.parseInt(groceryItemCountList[i]), groceryItemNameList[i], groceryItemIDList[i]));
-        }
+        DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
+        groceryItemArrayList = dbHelper.selectAll();
     }
 
     @Override
@@ -133,9 +131,12 @@ public class HomeFragment extends Fragment implements GroceryItemRVInterface {
 
     @Override
     public void onItemLongClick(int position) {
-        rvAdapter.notifyItemRangeRemoved(0,groceryItemArrayList.size());
-        groceryItemArrayList.remove(position);
-        rvAdapter.notifyItemRangeChanged(0, groceryItemArrayList.size());
+        DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
+        if(dbHelper.deleteOne(groceryItemArrayList.get(position))){
+            rvAdapter.notifyItemRangeRemoved(0,groceryItemArrayList.size());
+            groceryItemArrayList.remove(position);
+            rvAdapter.notifyItemRangeChanged(0, groceryItemArrayList.size());
+        }
     }
 
 }
