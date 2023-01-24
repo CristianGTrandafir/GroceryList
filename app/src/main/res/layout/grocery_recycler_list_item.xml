@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="wrap_content">
 
     <androidx.cardview.widget.CardView
         android:id="@+id/cardView"
@@ -16,7 +16,7 @@
             android:orientation="horizontal">
 
             <ImageView
-                android:id="@+id/imageView"
+                android:id="@+id/imageViewGroceryItem"
                 android:layout_width="50dp"
                 android:layout_height="match_parent"
                 app:srcCompat="@android:drawable/btn_star_big_on" />
