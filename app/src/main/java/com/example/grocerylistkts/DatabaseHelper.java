@@ -12,6 +12,7 @@ import androidx.annotation.Nullable;
 import com.google.android.material.tabs.TabLayout;
 
 import java.util.ArrayList;
+import java.util.Collection;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String GROCERY_LIST_TABLE = "GROCERY_LIST_TABLE";
@@ -25,7 +26,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        String createTableStatement = "CREATE TABLE " + GROCERY_LIST_TABLE + " (" + COLUMN_ID + " STRING PRIMARY KEY, " + COLUMN_ITEM_NAME + " STRING, " + COLUMN_ITEM_COUNT + " INT)";
+        String createTableStatement = "CREATE TABLE " + GROCERY_LIST_TABLE + " (" + COLUMN_ID + " TEXT PRIMARY KEY, " + COLUMN_ITEM_NAME + " TEXT, " + COLUMN_ITEM_COUNT + " INT)";
         db.execSQL(createTableStatement);
     }
 
@@ -40,9 +41,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         cv.put(COLUMN_ID, groceryItem.getItemID());
         cv.put(COLUMN_ITEM_NAME, groceryItem.getItemName());
         cv.put(COLUMN_ITEM_COUNT, groceryItem.getItemCount());
-
-        long insert = db.insert(GROCERY_LIST_TABLE, null, cv);
-        return insert != -1;
+        String queryString = "SELECT* FROM " + GROCERY_LIST_TABLE + " WHERE " + COLUMN_ID + "='" + groceryItem.getItemID() + "'";
+        Cursor cursor = db.rawQuery(queryString,null);
+        if(!cursor.moveToFirst()) {
+            db.insert(GROCERY_LIST_TABLE, null, cv);
+            return true;
+        }
+        return false;
     }
 
     public ArrayList<GroceryItem> selectAll() {
@@ -67,6 +72,17 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         String queryString = "DELETE FROM " + GROCERY_LIST_TABLE + " WHERE " + COLUMN_ID + "='" + groceryItem.getItemID() + "'";
         Cursor cursor = db.rawQuery(queryString, null);
-        return cursor.moveToFirst();
+        return !cursor.moveToFirst();
+    }
+
+    public void updateOne(GroceryItem groceryItem, String oldID) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        String queryString = "UPDATE " + GROCERY_LIST_TABLE + " SET " + COLUMN_ID + "='" + groceryItem.getItemID() + "' WHERE " + COLUMN_ID + "='" + oldID + "'";
+        db.execSQL(queryString);
+        queryString = "UPDATE " + GROCERY_LIST_TABLE + " SET " + COLUMN_ITEM_NAME + "='" + groceryItem.getItemName() + "' WHERE " + COLUMN_ID + "='" + groceryItem.getItemID() + "'";
+        db.execSQL(queryString);
+        queryString = "UPDATE " + GROCERY_LIST_TABLE + " SET " + COLUMN_ITEM_COUNT + "='" + groceryItem.getItemCount() + "' WHERE " + COLUMN_ID + "='" + groceryItem.getItemID() + "'";
+        db.execSQL(queryString);
+
     }
 }

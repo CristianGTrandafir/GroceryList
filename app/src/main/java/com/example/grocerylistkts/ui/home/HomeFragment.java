@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.GridLayout;
 import android.widget.PopupWindow;
 
 import androidx.annotation.NonNull;
@@ -120,10 +121,13 @@ public class HomeFragment extends Fragment implements GroceryItemRVInterface {
         popupWindow.showAtLocation(binding.getRoot().getRootView().findViewById(R.id.navigation_home), Gravity.CENTER, 0, 0);
 
         saveButton.setOnClickListener(v -> {
+            DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
             GroceryItem groceryItem = groceryItemArrayList.get(position);
+            String oldID = groceryItem.getItemID();
             groceryItem.setItemCount(Integer.parseInt(countEditText.getText().toString()));
             groceryItem.setItemName(nameEditText.getText().toString());
             groceryItem.setItemID(idEditText.getText().toString());
+            dbHelper.updateOne(groceryItem, oldID);
             rvAdapter.notifyItemChanged(position);
             popupWindow.dismiss();
         });
