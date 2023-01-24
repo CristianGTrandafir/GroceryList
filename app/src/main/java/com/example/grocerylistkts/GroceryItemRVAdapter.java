@@ -69,7 +69,7 @@ public class GroceryItemRVAdapter extends RecyclerView.Adapter<GroceryItemRVAdap
                         rvInterface.onItemLongClick(pos);
                     }
                 }
-                return false;
+                return true;
             });
         }
     }

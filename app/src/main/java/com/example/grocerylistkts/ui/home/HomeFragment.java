@@ -28,6 +28,7 @@ import com.example.grocerylistkts.GroceryItemRVAdapter;
 import com.example.grocerylistkts.GroceryItemRVInterface;
 import com.example.grocerylistkts.R;
 import com.example.grocerylistkts.databinding.FragmentHomeBinding;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
 
@@ -36,6 +37,7 @@ public class HomeFragment extends Fragment implements GroceryItemRVInterface {
     ArrayList<GroceryItem> groceryItemArrayList = new ArrayList<>();
     GroceryItemRVAdapter rvAdapter;
     RecyclerView rv;
+    FloatingActionButton fab;
 
     private FragmentHomeBinding binding;
 
@@ -54,6 +56,31 @@ public class HomeFragment extends Fragment implements GroceryItemRVInterface {
         rv.setAdapter(rvAdapter);
         rv.setLayoutManager(new LinearLayoutManager(this.getActivity()));
         registerForContextMenu(rv);
+        fab = root.findViewById(R.id.floatingActionButton);
+        fab.setOnClickListener(v-> {
+            LayoutInflater popupInflater = (LayoutInflater) getActivity().getApplicationContext().getSystemService(LAYOUT_INFLATER_SERVICE);
+            final View popupView = popupInflater.inflate(R.layout.popup_editable, null);
+            final PopupWindow popupWindow = new PopupWindow(popupView, ViewGroup.LayoutParams.WRAP_CONTENT, 600);
+            popupWindow.setElevation(5.0f);
+
+            EditText nameEditText = popupView.findViewById(R.id.editTextName);
+            EditText countEditText = popupView.findViewById(R.id.editTextCount);
+            EditText idEditText = popupView.findViewById(R.id.editTextID);
+            Button createNewItemButton = popupView.findViewById(R.id.buttonSaveChanges);
+            createNewItemButton.setText("Create New Item");
+
+            popupWindow.setFocusable(true);
+            popupWindow.setBackgroundDrawable(new ColorDrawable(Color.LTGRAY));
+            popupWindow.showAtLocation(binding.getRoot().getRootView().findViewById(R.id.navigation_home), Gravity.CENTER, 0, 0);
+
+            createNewItemButton.setOnClickListener(view -> {
+                groceryItemArrayList.add(new GroceryItem((Integer.parseInt(countEditText.getText().toString())),
+                        (nameEditText.getText().toString()),
+                        (idEditText.getText().toString())));
+                rvAdapter.notifyItemInserted(groceryItemArrayList.size());
+                popupWindow.dismiss();
+            });
+        });
         return root;
     }
 
@@ -106,8 +133,9 @@ public class HomeFragment extends Fragment implements GroceryItemRVInterface {
 
     @Override
     public void onItemLongClick(int position) {
+        rvAdapter.notifyItemRangeRemoved(0,groceryItemArrayList.size());
         groceryItemArrayList.remove(position);
-        rvAdapter.notifyItemChanged(position);
+        rvAdapter.notifyItemRangeChanged(0, groceryItemArrayList.size());
     }
 
 }
