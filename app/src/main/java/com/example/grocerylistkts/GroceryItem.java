@@ -13,6 +13,18 @@ public class GroceryItem {
         return itemName;
     }
 
+    public void setItemCount(int itemCount) {
+        this.itemCount = itemCount;
+    }
+
+    public void setItemName(String itemName) {
+        this.itemName = itemName;
+    }
+
+    public void setItemID(String itemID) {
+        this.itemID = itemID;
+    }
+
     public String getItemID() {
         return itemID;
     }

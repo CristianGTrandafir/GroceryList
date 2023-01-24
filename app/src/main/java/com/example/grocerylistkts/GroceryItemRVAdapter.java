@@ -35,7 +35,7 @@ public class GroceryItemRVAdapter extends RecyclerView.Adapter<GroceryItemRVAdap
         holder.groceryItemCountTextView.setText(groceryItemArrayList.get(position).getItemCount()+"");
         holder.groceryItemNameTextView.setText(groceryItemArrayList.get(position).getItemName());
         holder.groceryItemImageView.setImageResource(R.drawable.ic_dashboard_black_24dp);
-        //assign values
+        holder.itemView.setLongClickable(true);
     }
 
     @Override
@@ -61,6 +61,15 @@ public class GroceryItemRVAdapter extends RecyclerView.Adapter<GroceryItemRVAdap
                         rvInterface.onItemClick(pos);
                     }
                 }
+            });
+            itemView.setOnLongClickListener(v->{
+                if(rvInterface != null) {
+                    int pos = getAdapterPosition();
+                    if(pos != RecyclerView.NO_POSITION) {
+                        rvInterface.onItemLongClick(pos);
+                    }
+                }
+                return false;
             });
         }
     }

@@ -4,16 +4,17 @@ import static android.content.Context.LAYOUT_INFLATER_SERVICE;
 
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.view.ContextMenu;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewGroupOverlay;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.PopupWindow;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -33,6 +34,7 @@ import java.util.ArrayList;
 public class HomeFragment extends Fragment implements GroceryItemRVInterface {
 
     ArrayList<GroceryItem> groceryItemArrayList = new ArrayList<>();
+    GroceryItemRVAdapter rvAdapter;
     RecyclerView rv;
 
     private FragmentHomeBinding binding;
@@ -48,9 +50,10 @@ public class HomeFragment extends Fragment implements GroceryItemRVInterface {
         //homeViewModel.getText().observe(getViewLifecycleOwner(), textView::setText);
         rv = root.findViewById(R.id.groceryItemRecyclerView);
         setUpGroceryItemArrayList();
-        GroceryItemRVAdapter adapter = new GroceryItemRVAdapter(this.getActivity(), groceryItemArrayList, this);
-        rv.setAdapter(adapter);
+        rvAdapter = new GroceryItemRVAdapter(this.getActivity(), groceryItemArrayList, this);
+        rv.setAdapter(rvAdapter);
         rv.setLayoutManager(new LinearLayoutManager(this.getActivity()));
+        registerForContextMenu(rv);
         return root;
     }
 
@@ -75,18 +78,36 @@ public class HomeFragment extends Fragment implements GroceryItemRVInterface {
     public void onItemClick(int position) {
         LayoutInflater inflater = (LayoutInflater) getActivity().getApplicationContext().getSystemService(LAYOUT_INFLATER_SERVICE);
         final View popupView = inflater.inflate(R.layout.popup_editable, null);
-        final PopupWindow popupWindow = new PopupWindow(popupView, ViewGroup.LayoutParams.WRAP_CONTENT, 500);
+        final PopupWindow popupWindow = new PopupWindow(popupView, ViewGroup.LayoutParams.WRAP_CONTENT, 600);
         popupWindow.setElevation(5.0f);
 
         EditText nameEditText = popupView.findViewById(R.id.editTextName);
         EditText countEditText = popupView.findViewById(R.id.editTextCount);
+        EditText idEditText = popupView.findViewById(R.id.editTextID);
+        Button saveButton = popupView.findViewById(R.id.buttonSaveChanges);
 
         nameEditText.setText(groceryItemArrayList.get(position).getItemName());
         countEditText.setText(groceryItemArrayList.get(position).getItemCount()+"");
+        idEditText.setText(groceryItemArrayList.get(position).getItemID());
 
         popupWindow.setFocusable(true);
         popupWindow.setBackgroundDrawable(new ColorDrawable(Color.LTGRAY));
         popupWindow.showAtLocation(binding.getRoot().getRootView().findViewById(R.id.navigation_home), Gravity.CENTER, 0, 0);
+
+        saveButton.setOnClickListener(v -> {
+            GroceryItem groceryItem = groceryItemArrayList.get(position);
+            groceryItem.setItemCount(Integer.parseInt(countEditText.getText().toString()));
+            groceryItem.setItemName(nameEditText.getText().toString());
+            groceryItem.setItemID(idEditText.getText().toString());
+            rvAdapter.notifyItemChanged(position);
+            popupWindow.dismiss();
+        });
+    }
+
+    @Override
+    public void onItemLongClick(int position) {
+        groceryItemArrayList.remove(position);
+        rvAdapter.notifyItemChanged(position);
     }
 
 }
