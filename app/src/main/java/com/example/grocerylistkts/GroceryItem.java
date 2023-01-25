@@ -1,8 +1,19 @@
 package com.example.grocerylistkts;
 
+import androidx.annotation.NonNull;
+import androidx.room.ColumnInfo;
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
+
+@Entity(tableName = "GROCERY_ITEM_TABLE")
 public class GroceryItem {
+    @ColumnInfo(name = "ITEM_COUNT")
     private int itemCount;
+    @ColumnInfo(name = "ITEM_NAME")
     private String itemName;
+    @PrimaryKey
+    @ColumnInfo(name = "ITEM_ID")
+    @NonNull
     private String itemID;
 
     public int getItemCount() {

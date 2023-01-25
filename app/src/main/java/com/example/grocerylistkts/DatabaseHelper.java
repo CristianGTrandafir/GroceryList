@@ -15,10 +15,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
-    public static final String GROCERY_LIST_TABLE = "GROCERY_LIST_TABLE";
+    public static final String GROCERY_LIST_TABLE = "GROCERY_ITEM_TABLE";
     public static final String COLUMN_ITEM_NAME = "ITEM_NAME";
     public static final String COLUMN_ITEM_COUNT = "ITEM_COUNT";
-    public static final String COLUMN_ID = "ID";
+    public static final String COLUMN_ID = "ITEM_ID";
 
     public DatabaseHelper(@Nullable Context context) {
         super(context, "groceryList.db", null, 1);
@@ -83,6 +83,5 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL(queryString);
         queryString = "UPDATE " + GROCERY_LIST_TABLE + " SET " + COLUMN_ITEM_COUNT + "='" + groceryItem.getItemCount() + "' WHERE " + COLUMN_ID + "='" + groceryItem.getItemID() + "'";
         db.execSQL(queryString);
-
     }
 }
