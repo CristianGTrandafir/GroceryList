@@ -11,9 +11,7 @@ public class GroceryItem {
     private int itemCount;
     @ColumnInfo(name = "ITEM_NAME")
     private String itemName;
-    @PrimaryKey
-    @ColumnInfo(name = "ITEM_ID")
-    @NonNull
+    @ColumnInfo(name = "ITEM_ID") @NonNull @PrimaryKey
     private String itemID;
 
     public int getItemCount() {

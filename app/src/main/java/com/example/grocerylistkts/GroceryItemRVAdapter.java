@@ -11,18 +11,19 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class GroceryItemRVAdapter extends RecyclerView.Adapter<GroceryItemRVAdapter.MyViewHolder>{
     private final GroceryItemRVInterface rvInterface;
     Context context;
     ArrayList<GroceryItem> groceryItemArrayList;
 
-    public GroceryItemRVAdapter(Context context, ArrayList<GroceryItem> groceryItemArrayList,
-                                GroceryItemRVInterface rvInterface) {
+    public GroceryItemRVAdapter(Context context, ArrayList<GroceryItem> groceryItemArrayList, GroceryItemRVInterface rvInterface) {
         this.context = context;
         this.groceryItemArrayList = groceryItemArrayList;
         this.rvInterface = rvInterface;
     }
+
     @NonNull @Override
     public MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(context);
@@ -36,6 +37,11 @@ public class GroceryItemRVAdapter extends RecyclerView.Adapter<GroceryItemRVAdap
         holder.groceryItemNameTextView.setText(groceryItemArrayList.get(position).getItemName());
         holder.groceryItemImageView.setImageResource(R.drawable.ic_dashboard_black_24dp);
         holder.itemView.setLongClickable(true);
+    }
+
+    public void updateGroceryItemsList(List<GroceryItem> groceryItemsList) {
+        groceryItemArrayList = (ArrayList<GroceryItem>) groceryItemsList;
+        notifyDataSetChanged();
     }
 
     @Override
