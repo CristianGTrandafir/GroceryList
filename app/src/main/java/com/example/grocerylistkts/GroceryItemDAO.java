@@ -13,7 +13,7 @@ import java.util.List;
 @Dao
 public interface GroceryItemDAO {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    long insertGroceryItem(GroceryItem groceryItem);
+    void insertGroceryItem(GroceryItem groceryItem);
 
     @Update
     void updateGroceryItem(GroceryItem groceryItem);

@@ -16,11 +16,10 @@ import java.util.List;
 public class GroceryItemRVAdapter extends RecyclerView.Adapter<GroceryItemRVAdapter.MyViewHolder>{
     private final GroceryItemRVInterface rvInterface;
     Context context;
-    ArrayList<GroceryItem> groceryItemArrayList;
+    ArrayList<GroceryItem> groceryItemArrayList = new ArrayList<>();
 
-    public GroceryItemRVAdapter(Context context, ArrayList<GroceryItem> groceryItemArrayList, GroceryItemRVInterface rvInterface) {
+    public GroceryItemRVAdapter(Context context, GroceryItemRVInterface rvInterface) {
         this.context = context;
-        this.groceryItemArrayList = groceryItemArrayList;
         this.rvInterface = rvInterface;
     }
 
@@ -34,7 +33,8 @@ public class GroceryItemRVAdapter extends RecyclerView.Adapter<GroceryItemRVAdap
     @Override
     public void onBindViewHolder(@NonNull GroceryItemRVAdapter.MyViewHolder holder, int position) {
         holder.groceryItemCountTextView.setText(groceryItemArrayList.get(position).getItemCount()+"");
-        holder.groceryItemNameTextView.setText(groceryItemArrayList.get(position).getItemName());
+        holder.groceryItemNameTextView.setText(groceryItemArrayList.get(position).getItemName() +
+                " (" + groceryItemArrayList.get(position).getItemID() + ")");
         holder.groceryItemImageView.setImageResource(R.drawable.ic_dashboard_black_24dp);
         holder.itemView.setLongClickable(true);
     }
@@ -47,6 +47,10 @@ public class GroceryItemRVAdapter extends RecyclerView.Adapter<GroceryItemRVAdap
     @Override
     public int getItemCount() {
         return groceryItemArrayList.size();
+    }
+
+    public GroceryItem getGroceryItem(int position) {
+        return groceryItemArrayList.get(position);
     }
 
     public static class MyViewHolder extends RecyclerView.ViewHolder {

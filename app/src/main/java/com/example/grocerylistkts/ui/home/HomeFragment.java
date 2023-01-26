@@ -17,26 +17,18 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.room.Room;
 
-import com.example.grocerylistkts.GroceryItemDatabase;
 import com.example.grocerylistkts.GroceryItem;
-import com.example.grocerylistkts.GroceryItemDAO;
 import com.example.grocerylistkts.GroceryItemRVAdapter;
 import com.example.grocerylistkts.GroceryItemRVInterface;
 import com.example.grocerylistkts.R;
 import com.example.grocerylistkts.databinding.FragmentHomeBinding;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import androidx.lifecycle.Observer;
 
 public class HomeFragment extends Fragment implements GroceryItemRVInterface {
-
-    ArrayList<GroceryItem> groceryItemArrayList = new ArrayList<>();
 
     GroceryItemRVAdapter rvAdapter;
     RecyclerView rv;
@@ -46,14 +38,6 @@ public class HomeFragment extends Fragment implements GroceryItemRVInterface {
 
     private FragmentHomeBinding binding;
     private HomeViewModel homeViewModel;
-    Observer<List<GroceryItem>> groceryItemUpdateObserver = new Observer<List<GroceryItem>>() {
-        @Override
-        public void onChanged(List<GroceryItem> groceryItems) {
-            Log.i("Home", groceryItems.toString() +"SelectAll");
-            groceryItemArrayList = (ArrayList<GroceryItem>) groceryItems;
-            rvAdapter.updateGroceryItemsList(groceryItems);
-        }
-    };
 
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
@@ -61,23 +45,21 @@ public class HomeFragment extends Fragment implements GroceryItemRVInterface {
         View root = binding.getRoot();
 
         rv = root.findViewById(R.id.groceryItemRecyclerView);
-        rvAdapter = new GroceryItemRVAdapter(getActivity(), groceryItemArrayList, this);
+        rvAdapter = new GroceryItemRVAdapter(getActivity(), this);
         rv.setAdapter(rvAdapter);
         rv.setLayoutManager(new LinearLayoutManager(getActivity()));
 
-        homeViewModel = new ViewModelProvider(this).get(HomeViewModel.class);
-        homeViewModel.getAll().observe(getViewLifecycleOwner(), groceryItemUpdateObserver);
-
         fab = root.findViewById(R.id.floatingActionButton);
         fab.setOnClickListener(v -> setUpPopupMenu());
+
+        homeViewModel = new ViewModelProvider(this).get(HomeViewModel.class);
+        homeViewModel.getAll().observe(getViewLifecycleOwner(),
+                groceryItems -> {
+                    Log.i("Home", groceryItems.toString() + "SelectAll");
+                    rvAdapter.updateGroceryItemsList(groceryItems);
+                });
+
         return root;
-    }
-
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        binding = null;
     }
 
     @Override
@@ -87,12 +69,9 @@ public class HomeFragment extends Fragment implements GroceryItemRVInterface {
 
     @Override
     public void onItemLongClick(int position) {
-        executor.submit(new Runnable() {
-            @Override
-            public void run() {
-                Log.i("Home", "Delete");
-                homeViewModel.delete(groceryItemArrayList.get(position));
-            }
+        executor.submit(() -> {
+            Log.i("Home", "Delete");
+            homeViewModel.delete(rvAdapter.getGroceryItem(position));
         });
     }
 
@@ -110,26 +89,22 @@ public class HomeFragment extends Fragment implements GroceryItemRVInterface {
         EditText idEditText = popupView.findViewById(R.id.editTextID);
         Button updateButton = popupView.findViewById(R.id.buttonSaveChanges);
 
-        nameEditText.setText(groceryItemArrayList.get(position).getItemName());
-        countEditText.setText(groceryItemArrayList.get(position).getItemCount() + "");
-        idEditText.setText(groceryItemArrayList.get(position).getItemID());
+        nameEditText.setText(rvAdapter.getGroceryItem(position).getItemName());
+        countEditText.setText(rvAdapter.getGroceryItem(position).getItemCount() + "");
+        idEditText.setText(rvAdapter.getGroceryItem(position).getItemID());
 
         updateButton.setOnClickListener(v -> {
-            GroceryItem groceryItem = groceryItemArrayList.get(position);
+            GroceryItem groceryItem = rvAdapter.getGroceryItem(position);
             groceryItem.setItemCount(Integer.parseInt(countEditText.getText().toString()));
             groceryItem.setItemName(nameEditText.getText().toString());
             groceryItem.setItemID(idEditText.getText().toString());
-            executor.submit(new Runnable() {
-                @Override
-                public void run() {
-                    Log.i("Home", "Update");
-                    homeViewModel.update(groceryItem);
-                }
+            executor.submit(() -> {
+                Log.i("Home", "Update");
+                homeViewModel.update(groceryItem);
             });
             popupWindow.dismiss();
         });
     }
-
 
     public void setUpPopupMenu() {
         LayoutInflater popupInflater = getActivity().getLayoutInflater();
@@ -152,19 +127,17 @@ public class HomeFragment extends Fragment implements GroceryItemRVInterface {
                     Integer.parseInt(countEditText.getText().toString()),
                     nameEditText.getText().toString(),
                     idEditText.getText().toString());
-            executor.submit(new Runnable() {
-                @Override
-                public void run() {
-                    Log.i("Home", "Insert");
-                    homeViewModel.insert(newGroceryItem);
-                }
+            executor.submit(() -> {
+                Log.i("Home", "Insert");
+                homeViewModel.insert(newGroceryItem);
             });
             popupWindow.dismiss();
         });
     }
 
-    public void insertNewItem(View popupView) {
-
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        binding = null;
     }
-
 }
