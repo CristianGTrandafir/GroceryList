@@ -1,11 +1,8 @@
 package com.example.grocerylistkts.ui.home;
 
-import static android.content.Context.LAYOUT_INFLATER_SERVICE;
-
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
-import android.os.Looper;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -22,7 +19,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.room.Room;
 
-import com.example.grocerylistkts.AppDatabase;
+import com.example.grocerylistkts.GroceryItemDatabase;
 import com.example.grocerylistkts.GroceryItem;
 import com.example.grocerylistkts.GroceryItemDAO;
 import com.example.grocerylistkts.GroceryItemRVAdapter;
@@ -45,8 +42,6 @@ public class HomeFragment extends Fragment implements GroceryItemRVInterface {
     RecyclerView rv;
     FloatingActionButton fab;
 
-    static AppDatabase db;
-    GroceryItemDAO userDao;
     ExecutorService executor = Executors.newSingleThreadExecutor();
 
     private FragmentHomeBinding binding;
@@ -64,9 +59,6 @@ public class HomeFragment extends Fragment implements GroceryItemRVInterface {
 
         binding = FragmentHomeBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
-
-        db = Room.databaseBuilder(getActivity(), AppDatabase.class, "database-name").build();
-        userDao = db.groceryItemDAO();
 
         rv = root.findViewById(R.id.groceryItemRecyclerView);
         rvAdapter = new GroceryItemRVAdapter(getActivity(), groceryItemArrayList, this);
@@ -99,7 +91,7 @@ public class HomeFragment extends Fragment implements GroceryItemRVInterface {
             @Override
             public void run() {
                 Log.i("Home", "Delete");
-                userDao.deleteGroceryItem(groceryItemArrayList.get(position));
+                homeViewModel.delete(groceryItemArrayList.get(position));
             }
         });
     }
@@ -131,7 +123,7 @@ public class HomeFragment extends Fragment implements GroceryItemRVInterface {
                 @Override
                 public void run() {
                     Log.i("Home", "Update");
-                    userDao.updateGroceryItem(groceryItem);
+                    homeViewModel.update(groceryItem);
                 }
             });
             popupWindow.dismiss();
@@ -164,7 +156,7 @@ public class HomeFragment extends Fragment implements GroceryItemRVInterface {
                 @Override
                 public void run() {
                     Log.i("Home", "Insert");
-                    userDao.insertGroceryItem(newGroceryItem);
+                    homeViewModel.insert(newGroceryItem);
                 }
             });
             popupWindow.dismiss();

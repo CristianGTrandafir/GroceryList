@@ -21,6 +21,6 @@ public interface GroceryItemDAO {
     @Delete
     void deleteGroceryItem(GroceryItem groceryItem);
 
-    @Query("SELECT* FROM GROCERY_ITEM_TABLE")
+    @Query("SELECT* FROM GROCERY_ITEM_TABLE ORDER BY ITEM_NAME DESC")
     LiveData<List<GroceryItem>> getAll();
 }
