@@ -12,7 +12,7 @@ import java.util.List;
 
 @Dao
 public interface GroceryItemDAO {
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    @Insert(onConflict = OnConflictStrategy.IGNORE)         //Doesn't allow user to insert items with duplicate IDs
     void insertGroceryItem(GroceryItem groceryItem);
 
     @Update
@@ -21,6 +21,6 @@ public interface GroceryItemDAO {
     @Delete
     void deleteGroceryItem(GroceryItem groceryItem);
 
-    @Query("SELECT* FROM GROCERY_ITEM_TABLE ORDER BY ITEM_NAME DESC")
+    @Query("SELECT* FROM GROCERY_ITEM_TABLE")
     LiveData<List<GroceryItem>> getAll();
 }

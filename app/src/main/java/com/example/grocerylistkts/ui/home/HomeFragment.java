@@ -34,6 +34,9 @@ public class HomeFragment extends Fragment implements GroceryItemRVInterface {
     RecyclerView rv;
     FloatingActionButton fab;
 
+    View popupView;
+    PopupWindow popupWindow;
+
     ExecutorService executor = Executors.newSingleThreadExecutor();
 
     private FragmentHomeBinding binding;
@@ -50,71 +53,36 @@ public class HomeFragment extends Fragment implements GroceryItemRVInterface {
         rv.setLayoutManager(new LinearLayoutManager(getActivity()));
 
         fab = root.findViewById(R.id.floatingActionButton);
-        fab.setOnClickListener(v -> setUpPopupMenu());
+        fab.setOnClickListener(v -> displayPopupWindow(0,true));
 
         homeViewModel = new ViewModelProvider(this).get(HomeViewModel.class);
         homeViewModel.getAll().observe(getViewLifecycleOwner(),
                 groceryItems -> {
-                    Log.i("Home", groceryItems.toString() + "SelectAll");
+                    Log.i("Home", groceryItems.toString() + "getAll");
                     rvAdapter.updateGroceryItemsList(groceryItems);
                 });
 
         return root;
     }
 
-    @Override
-    public void onItemClick(int position) {
-        setUpPopupMenu2(position);
-    }
-
-    @Override
-    public void onItemLongClick(int position) {
-        executor.submit(() -> {
-            Log.i("Home", "Delete");
-            homeViewModel.delete(rvAdapter.getGroceryItem(position));
-        });
-    }
-
-    public void setUpPopupMenu2(int position) {
+    /**Displays a popup menu for the user. Used for both inserting and updating grocery items.**/
+    public void displayPopupWindow(int position, boolean isInsert) {
         LayoutInflater popupInflater = getActivity().getLayoutInflater();
-        final View popupView = popupInflater.inflate(R.layout.popup_editable, null);
-        final PopupWindow popupWindow = new PopupWindow(popupView, ViewGroup.LayoutParams.WRAP_CONTENT, 600);
+        popupView = popupInflater.inflate(R.layout.popup_editable, null);
+        popupWindow = new PopupWindow(popupView, ViewGroup.LayoutParams.WRAP_CONTENT, 600);
         popupWindow.setElevation(5.0f);
         popupWindow.setFocusable(true);
         popupWindow.setBackgroundDrawable(new ColorDrawable(Color.LTGRAY));
         popupWindow.showAtLocation(binding.getRoot().getRootView().findViewById(R.id.navigation_home), Gravity.CENTER, 0, 0);
 
-        EditText nameEditText = popupView.findViewById(R.id.editTextName);
-        EditText countEditText = popupView.findViewById(R.id.editTextCount);
-        EditText idEditText = popupView.findViewById(R.id.editTextID);
-        Button updateButton = popupView.findViewById(R.id.buttonSaveChanges);
-
-        nameEditText.setText(rvAdapter.getGroceryItem(position).getItemName());
-        countEditText.setText(rvAdapter.getGroceryItem(position).getItemCount() + "");
-        idEditText.setText(rvAdapter.getGroceryItem(position).getItemID());
-
-        updateButton.setOnClickListener(v -> {
-            GroceryItem groceryItem = rvAdapter.getGroceryItem(position);
-            groceryItem.setItemCount(Integer.parseInt(countEditText.getText().toString()));
-            groceryItem.setItemName(nameEditText.getText().toString());
-            groceryItem.setItemID(idEditText.getText().toString());
-            executor.submit(() -> {
-                Log.i("Home", "Update");
-                homeViewModel.update(groceryItem);
-            });
-            popupWindow.dismiss();
-        });
+        if(isInsert)
+            insertItem();
+        else
+            updateItem(position);
     }
 
-    public void setUpPopupMenu() {
-        LayoutInflater popupInflater = getActivity().getLayoutInflater();
-        final View popupView = popupInflater.inflate(R.layout.popup_editable, null);
-        final PopupWindow popupWindow = new PopupWindow(popupView, ViewGroup.LayoutParams.WRAP_CONTENT, 600);
-        popupWindow.setElevation(5.0f);
-        popupWindow.setFocusable(true);
-        popupWindow.setBackgroundDrawable(new ColorDrawable(Color.LTGRAY));
-        popupWindow.showAtLocation(binding.getRoot().getRootView().findViewById(R.id.navigation_home), Gravity.CENTER, 0, 0);
-
+    /**Helper method for displayPopupMenu. Called when user clicks on FAB to insert new grocery item.**/
+    public void insertItem() {
         EditText nameEditText = popupView.findViewById(R.id.editTextName);
         EditText countEditText = popupView.findViewById(R.id.editTextCount);
         EditText idEditText = popupView.findViewById(R.id.editTextID);
@@ -129,9 +97,46 @@ public class HomeFragment extends Fragment implements GroceryItemRVInterface {
                     idEditText.getText().toString());
             executor.submit(() -> {
                 Log.i("Home", "Insert");
-                homeViewModel.insert(newGroceryItem);
+                homeViewModel.insert(newGroceryItem); //This fails if item has duplicate ID.
             });
             popupWindow.dismiss();
+        });
+    }
+
+    /**Helper method for displayPopupMenu. Called when user clicks RV item to update existing grocery item.**/
+    public void updateItem(int position) {
+        EditText nameEditText = popupView.findViewById(R.id.editTextName);
+        EditText countEditText = popupView.findViewById(R.id.editTextCount);
+        EditText idEditText = popupView.findViewById(R.id.editTextID);
+        Button updateButton = popupView.findViewById(R.id.buttonSaveChanges);
+
+        nameEditText.setText(rvAdapter.getGroceryItem(position).getItemName());
+        countEditText.setText(rvAdapter.getGroceryItem(position).getItemCount() + "");
+        idEditText.setText(rvAdapter.getGroceryItem(position).getItemID());
+        idEditText.setEnabled(false); //Don't allow user to change ID since it's primary key in database
+
+        updateButton.setOnClickListener(v -> {
+            GroceryItem groceryItem = rvAdapter.getGroceryItem(position);
+            groceryItem.setItemCount(Integer.parseInt(countEditText.getText().toString()));
+            groceryItem.setItemName(nameEditText.getText().toString());
+            executor.submit(() -> {
+                Log.i("Home", "Update");
+                homeViewModel.update(groceryItem);
+            });
+            popupWindow.dismiss();
+        });
+    }
+
+    @Override
+    public void onItemClick(int position) {
+        displayPopupWindow(position, false);
+    }
+
+    @Override
+    public void onItemLongClick(int position) {
+        executor.submit(() -> {
+            Log.i("Home", "Delete");
+            homeViewModel.delete(rvAdapter.getGroceryItem(position));
         });
     }
 

@@ -14,9 +14,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class GroceryItemRVAdapter extends RecyclerView.Adapter<GroceryItemRVAdapter.MyViewHolder>{
-    private final GroceryItemRVInterface rvInterface;
-    Context context;
-    ArrayList<GroceryItem> groceryItemArrayList = new ArrayList<>();
+
+    private final GroceryItemRVInterface rvInterface;       //Needed for click and long click callbacks
+    Context context;                                        //Needed for click and long click callbacks
+    ArrayList<GroceryItem> groceryItemArrayList = new ArrayList<>();    //Data array for views
 
     public GroceryItemRVAdapter(Context context, GroceryItemRVInterface rvInterface) {
         this.context = context;
@@ -39,16 +40,17 @@ public class GroceryItemRVAdapter extends RecyclerView.Adapter<GroceryItemRVAdap
         holder.itemView.setLongClickable(true);
     }
 
+    public int getItemCount() {
+        return groceryItemArrayList.size();
+    }
+
+    /**Helper method that updates groceryItemsArrayList with groceryItemsList when LiveData changes**/
     public void updateGroceryItemsList(List<GroceryItem> groceryItemsList) {
         groceryItemArrayList = (ArrayList<GroceryItem>) groceryItemsList;
         notifyDataSetChanged();
     }
 
-    @Override
-    public int getItemCount() {
-        return groceryItemArrayList.size();
-    }
-
+    /**Helper method that accesses the groceryItemsArrayList with a position and returns a GroceryItem object**/
     public GroceryItem getGroceryItem(int position) {
         return groceryItemArrayList.get(position);
     }
@@ -58,28 +60,23 @@ public class GroceryItemRVAdapter extends RecyclerView.Adapter<GroceryItemRVAdap
         ImageView groceryItemImageView;
         TextView groceryItemNameTextView;
         TextView groceryItemCountTextView;
+
+        //Grab views from grocery_recyclerview_list_item.xml and sets up click and long click callbacks
         public MyViewHolder(@NonNull View itemView, GroceryItemRVInterface rvInterface) {
-            //Grab views from RVlayout file
             super(itemView);
             groceryItemImageView = itemView.findViewById(R.id.imageViewGroceryItem);
             groceryItemNameTextView = itemView.findViewById(R.id.textViewGroceryName);
             groceryItemCountTextView = itemView.findViewById(R.id.textViewGroceryCount);
             itemView.setOnClickListener(v -> {
-                if(rvInterface != null) {
-                    int pos = getAdapterPosition();
-                    if(pos != RecyclerView.NO_POSITION) {
-                        rvInterface.onItemClick(pos);
-                    }
-                }
+                if(rvInterface != null)
+                    if(getAdapterPosition() != RecyclerView.NO_POSITION)
+                        rvInterface.onItemClick(getAdapterPosition());
             });
             itemView.setOnLongClickListener(v->{
-                if(rvInterface != null) {
-                    int pos = getAdapterPosition();
-                    if(pos != RecyclerView.NO_POSITION) {
-                        rvInterface.onItemLongClick(pos);
-                    }
-                }
-                return true;
+                if(rvInterface != null)
+                    if(getAdapterPosition() != RecyclerView.NO_POSITION)
+                        rvInterface.onItemLongClick(getAdapterPosition());
+                return true; //This has no semantic value yet
             });
         }
     }

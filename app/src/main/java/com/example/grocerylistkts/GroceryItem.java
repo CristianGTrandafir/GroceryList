@@ -14,6 +14,12 @@ public class GroceryItem {
     @ColumnInfo(name = "ITEM_ID") @NonNull @PrimaryKey
     private String itemID;
 
+    public GroceryItem(int itemCount, String itemName, String itemID) {
+        this.itemCount = itemCount;
+        this.itemName = itemName;
+        this.itemID = itemID;
+    }
+
     public int getItemCount() {
         return itemCount;
     }
@@ -30,17 +36,7 @@ public class GroceryItem {
         this.itemName = itemName;
     }
 
-    public void setItemID(String itemID) {
-        this.itemID = itemID;
-    }
-
     public String getItemID() {
         return itemID;
-    }
-
-    public GroceryItem(int itemCount, String itemName, String itemID) {
-        this.itemCount = itemCount;
-        this.itemName = itemName;
-        this.itemID = itemID;
     }
 }

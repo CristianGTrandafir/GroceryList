@@ -17,7 +17,7 @@ public class HomeViewModel extends AndroidViewModel {
 
     public HomeViewModel(Application app) {
         super(app);
-        GroceryItemDatabase groceryItemDatabase = GroceryItemDatabase.getInstance(app);
+        GroceryItemDatabase groceryItemDatabase = GroceryItemDatabase.getInstance(app); //This is where database gets instantiated
         groceryDao = groceryItemDatabase.groceryItemDAO();
     }
 
