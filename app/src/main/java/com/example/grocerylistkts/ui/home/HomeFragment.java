@@ -5,7 +5,6 @@ import static android.content.Context.LAYOUT_INFLATER_SERVICE;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 import android.view.Gravity;
@@ -46,7 +45,6 @@ public class HomeFragment extends Fragment implements GroceryItemRVInterface {
     RecyclerView rv;
     FloatingActionButton fab;
 
-    Handler handler = new Handler(Looper.getMainLooper());
     static AppDatabase db;
     GroceryItemDAO userDao;
     ExecutorService executor = Executors.newSingleThreadExecutor();
@@ -56,25 +54,21 @@ public class HomeFragment extends Fragment implements GroceryItemRVInterface {
     Observer<List<GroceryItem>> groceryItemUpdateObserver = new Observer<List<GroceryItem>>() {
         @Override
         public void onChanged(List<GroceryItem> groceryItems) {
-            Log.i("Model", groceryItems.toString() +"Hello");
+            Log.i("Home", groceryItems.toString() +"SelectAll");
             groceryItemArrayList = (ArrayList<GroceryItem>) groceryItems;
             rvAdapter.updateGroceryItemsList(groceryItems);
         }
     };
 
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        //HomeViewModel homeViewModel = new ViewModelProvider(this).get(HomeViewModel.class);
 
         binding = FragmentHomeBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
-
         db = Room.databaseBuilder(getActivity(), AppDatabase.class, "database-name").build();
         userDao = db.groceryItemDAO();
-        //final TextView textView = binding.textHome;
-        //homeViewModel.getText().observe(getViewLifecycleOwner(), textView::setText);
+
         rv = root.findViewById(R.id.groceryItemRecyclerView);
-        //setUpGroceryItemArrayList(this);
         rvAdapter = new GroceryItemRVAdapter(getActivity(), groceryItemArrayList, this);
         rv.setAdapter(rvAdapter);
         rv.setLayoutManager(new LinearLayoutManager(getActivity()));
@@ -87,27 +81,6 @@ public class HomeFragment extends Fragment implements GroceryItemRVInterface {
         return root;
     }
 
-
-
-    private void setUpGroceryItemArrayList(GroceryItemRVInterface inter) {
-        executor.submit(new Runnable() {
-            @Override
-            public void run() {
-                //groceryItemArrayList = (ArrayList<GroceryItem>) userDao.getAll();
-                Log.i("SelectAll", "Selected");
-                handler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        rvAdapter = new GroceryItemRVAdapter(getActivity(), groceryItemArrayList, inter);
-                        rv.setAdapter(rvAdapter);
-                        rv.setLayoutManager(new LinearLayoutManager(getActivity()));
-                        rvAdapter.notifyDataSetChanged();
-                    }
-                });
-            }
-        });
-
-    }
 
     @Override
     public void onDestroyView() {
@@ -125,20 +98,8 @@ public class HomeFragment extends Fragment implements GroceryItemRVInterface {
         executor.submit(new Runnable() {
             @Override
             public void run() {
-                userDao.deleteGroceryItem(groceryItemArrayList.get(position).getItemID());
-            }
-        });
-        executor.submit(new Runnable() {
-            @Override
-            public void run() {
-                handler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        rvAdapter.notifyItemRangeRemoved(0, groceryItemArrayList.size());
-                        groceryItemArrayList.remove(position);
-                        rvAdapter.notifyItemRangeChanged(0, groceryItemArrayList.size());
-                    }
-                });
+                Log.i("Home", "Delete");
+                userDao.deleteGroceryItem(groceryItemArrayList.get(position));
             }
         });
     }
@@ -169,13 +130,8 @@ public class HomeFragment extends Fragment implements GroceryItemRVInterface {
             executor.submit(new Runnable() {
                 @Override
                 public void run() {
+                    Log.i("Home", "Update");
                     userDao.updateGroceryItem(groceryItem);
-                    handler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            rvAdapter.notifyItemChanged(position);
-                        }
-                    });
                 }
             });
             popupWindow.dismiss();
@@ -207,17 +163,8 @@ public class HomeFragment extends Fragment implements GroceryItemRVInterface {
             executor.submit(new Runnable() {
                 @Override
                 public void run() {
-                    long success = userDao.insertGroceryItem(newGroceryItem);
-                    if (success != -1) {
-                        handler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                groceryItemArrayList.add(newGroceryItem);
-                                Log.i("Insert", "Inserted");
-                                rvAdapter.notifyItemInserted(groceryItemArrayList.size() - 1);
-                            }
-                        });
-                    }
+                    Log.i("Home", "Insert");
+                    userDao.insertGroceryItem(newGroceryItem);
                 }
             });
             popupWindow.dismiss();

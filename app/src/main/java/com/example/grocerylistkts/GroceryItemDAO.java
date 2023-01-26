@@ -8,9 +8,6 @@ import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 import androidx.room.Update;
 
-import com.google.common.util.concurrent.ListenableFuture;
-
-import java.util.ArrayList;
 import java.util.List;
 
 @Dao
@@ -21,8 +18,8 @@ public interface GroceryItemDAO {
     @Update
     void updateGroceryItem(GroceryItem groceryItem);
 
-    @Query("DELETE FROM GROCERY_ITEM_TABLE WHERE ITEM_ID = :itemID")
-    void deleteGroceryItem(String itemID);
+    @Delete
+    void deleteGroceryItem(GroceryItem groceryItem);
 
     @Query("SELECT* FROM GROCERY_ITEM_TABLE")
     LiveData<List<GroceryItem>> getAll();
